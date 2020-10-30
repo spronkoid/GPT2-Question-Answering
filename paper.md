@@ -60,7 +60,6 @@ index = 1
 
 while(index < len(text)):
     dataset += c+text[index]
-
     qindex = 1
 
     while qindex < len(eval(questions[index])):
