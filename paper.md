@@ -38,11 +38,11 @@ Wrong!
 
 We need to clean up the csv file and transform it into a `.txt` file. Take the `context`, `question`, and `answer` parts of it and iteratively write them to the file. (I already did so and the file can be found [here](https://gist.github.com/spronkoid/e721c592b98384923db9a6df4d6cf5e5)). Here's how I did it.
 
-`import pandas`
-
-`colnames = ['index', 'text', 'questions', 'answers']`
-
-`data = pandas.read_csv('QA Dataset.csv', names=colnames)`
+```python
+import pandas
+colnames = ['index', 'text', 'questions', 'answers']
+data = pandas.read_csv('QA Dataset.csv', names=colnames)
+```
 
 The first line imports the library we're going to use. (A library is a set of commands that we can use instead of writing them ourselves.) 
 
@@ -50,67 +50,47 @@ The second line is how we tell the program what columns there are in the CSV fil
 
 Now we need to compile all the contexts, questions, and answers together, but with a `<|startoftext|>` and `<|endoftext|`> to denote them. We also need to clean up the answers because they're formatted in a way where GPT-2 (the model we're using) has to work a little extra hard to understand.
 
-`dataset = ""`
+```python
+dataset = ""
 
+text=data.text.tolist()
+questions=data.questions.tolist()
+answers=data.answers.tolist()
 
+c, q, a, e = "<|startoftext|>\n[CONTEXT]: ", "\n[QUESTION]:", "\n[ANSWER]:", "\n<|endoftext|>\n"
+index = 1
 
-`text=data.text.tolist()`
+while(index<len(text)):
+  dataset+=c+text[index]
 
-`questions=data.questions.tolist()`
+  qindex = 1
 
-`answers=data.answers.tolist()`
+  while(qindex<len(eval(questions[index]))):
+​    question = eval(questions[index])[qindex]
+​    questionS = ''.join(map(str, question))
 
+​    answer = eval(answers[index])[qindex]
+​    answerS = ''.join(map(str, answer))
 
+​    answerS = answerS[:-21:] #removes the last 21 characters of the answer
+​    answerS = answerS[9 : : ]# removes the first 9 characters of the answer
 
-`c, q, a, e = "<|startoftext|>\n[CONTEXT]: ", "\n[QUESTION]:", "\n[ANSWER]:", "\n<|endoftext|>\n"`
+​    dataset+=q+questionS
+​    dataset+=a+answerS
 
-`index = 1`
+  dataset+=e
+  index+=1
 
-`while(index<len(text)):`
-
-  `dataset+=c+text[index]`
-
-
-
-  `qindex = 1`
-
-  `while(qindex<len(eval(questions[index]))):`
-
-​    `question = eval(questions[index])[qindex]`
-
-​    `questionS = ''.join(map(str, question))`
-
-
-
-​    `answer = eval(answers[index])[qindex]`
-
-​    `answerS = ''.join(map(str, answer))`
-
-
-
-​    `answerS = answerS[:-21:] #removes the last 21 characters of the answer`
-
-​    `answerS = answerS[9 : : ]# removes the first 9 characters of the answer`
-
-
-
-​    `dataset+=q+questionS`
-
-​    `dataset+=a+answerS`
-
-  `dataset+=e`
-
-  `index+=1`
-
-`print(dataset)`
+print(dataset)
+```
 
 That was the quickest way I could think of doing it, I'm not a programming mastermind. It works exactly how we need it to. Now we can write it all into a `.txt` file with these few lines:
 
-`f = open("QAdataset.txt","w+")`
-
-`f.write(dataset)`
-
-`f.close()`
+```python
+f = open("QAdataset.txt","w+")
+f.write(dataset)
+f.close()
+```
 
 ## Setting up the Model
 
@@ -118,15 +98,21 @@ Cool! Now we have everything we need. Let's open up [Max Woolf's notebook](https
 
 All we have to do is change this:
 
-`gpt2.download_gpt2(model_name="124M")`
+```python
+gpt2.download_gpt2(model_name="124M")
+```
 
 to this:
 
-`gpt2.download_gpt2(model_name="345M")`
+```python
+gpt2.download_gpt2(model_name="345M")
+```
 
 so that we use a more powerful model, and then we change our file name (he suggests we upload it to drive, we don't have to though and I just didn't run the line of code after this:)
 
-`file_name = "shakespeare.txt"`
+```python
+file_name = "shakespeare.txt"
+```
 
 instead of `"shakespeare.txt"`, we put `"QAdataset.txt"`. 
 
@@ -134,25 +120,18 @@ instead of `"shakespeare.txt"`, we put `"QAdataset.txt"`.
 
 The last thing we change is the number of steps to train it for, and maybe the model name if you want. Here's what mine looked like:
 
-`gpt2.finetune(sess,`
-
-​       `dataset=file_name,`
-
-​       `model_name='345M',`
-
-​       `steps=2000,`
-
-​       `restore_from='fresh',`
-
-​       `run_name='QA',`
-
-​       `print_every=1,`
-
-​       `sample_every=2000,`
-
-​       `save_every=100`
-
-​       `)`
+```python
+gpt2.finetune(sess,
+​       dataset=file_name,
+​       model_name='345M',
+​       steps=2000,
+​       restore_from='fresh',
+​       run_name='QA',
+​       print_every=1,
+​       sample_every=2000,
+​       save_every=100
+​       )
+```
 
 and we're complete! My final model ended with a loss of 0.06 after 4000 steps. 
 
@@ -160,31 +139,25 @@ and we're complete! My final model ended with a loss of 0.06 after 4000 steps.
 
 When generating answers, I wrote this bit of code: 
 
-`ctx = input("Context: ")`
-
-`qst = input("Question: ")`
-
-`ans = "[ANSWER]:"`
-
-`pre = '<|startoftext|>\n[CONTEXT]: ' + ctx + "\n[QUESTION]:" + qst + "\n" + ans`
+```python
+ctx = input("Context: ")
+qst = input("Question: ")
+ans = "[ANSWER]:"
+pre = '<|startoftext|>\n[CONTEXT]: ' + ctx + "\n[QUESTION]:" + qst + "\n" + ans
+```
 
 to make it a bit easier to format the prompt. The context is data about your subject, I've been testing it on the first paragraph of wikipedia pages. The question is what you want to ask about that paragraph. You can `print(pre)` to copy and paste it, or just pass `pre` as the prompt instead of a string. Here's what my code looked like for generating,
 
-`gpt2.generate(sess,`
-
-​       `length=5,`
-
-​       `temperature=0.7,`
-
-​       `prefix=pre,`
-
-​       `nsamples=10,`
-
-​       `batch_size=10,`
-
-​       `run_name="QA",`
-
-​       `)`
+```python
+gpt2.generate(sess,
+​       length=5,
+​       temperature=0.7,
+​       prefix=pre,
+​       nsamples=10,
+​       batch_size=10,
+​       run_name="QA",
+​       )
+```
 
 We make it generate 10 times, because it's not always accurate, so we can see which one is the correct answer by seeing which thing it answered the most. If it doesn't generate your full answer then crank up the length to around 10 or 20 (it's how much the model predicts)
 
