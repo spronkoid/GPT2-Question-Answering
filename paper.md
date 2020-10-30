@@ -69,7 +69,7 @@ while(index < len(text)):
         answerS = ''.join(map(str, answer))
 
         answerS = answerS[:-21:] # removes the last 21 characters of the answer
-        answerS = answerS[9::]  # removes the first 9 characters of the answer
+        answerS = answerS[9::] # removes the first 9 characters of the answer
 
         dataset += q+questionS
         dataset += a+answerS
