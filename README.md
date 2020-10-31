@@ -1,5 +1,8 @@
 # An Ai that can do Your Homework
 
+(edit: why are y'all forking this, like this code so old)
+
+
 just run the notebook in google colab, otherwise you can't save and load the model (that i know of).
 
 This is a compilation of code by Max Woolf and my code to build the SQUAD dataset and use it with GPT-2.
