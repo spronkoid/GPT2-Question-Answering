@@ -198,4 +198,4 @@ That's all for now.
 
 Thanks for reading,
 
-[@samuelreams](twitter.com/spronkoid)
+[Chloe Noelle](spronkoid.medium.com)
